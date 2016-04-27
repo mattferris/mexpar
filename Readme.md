@@ -92,7 +92,7 @@ ontoken('T_BAR', \&handler_bar);
 ```
 
 `ontoken()` accepts a token type as it's first argument and a subroutine
-reference as it's second argument. The handler for `T_FOO` demonstrates an
+reference as it's second argument. The handler for `T_FOO` demonstrates a
 registering anonymous subroutine as a handler, while `T_BAR` demonstrates
 registering an existing subroutine as a handler.
 

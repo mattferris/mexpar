@@ -1,0 +1,6 @@
+#!/usr/bin/perl
+
+push(@INC, '..');
+use Test::Harness;
+
+runtests(<unit/*Test.pl>);

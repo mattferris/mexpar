@@ -152,11 +152,6 @@ sub parse
             }
         }
 
-#        if (defined($handlers->{$t->{'type'}})) {
-#            foreach my $h (@{$handlers->{$t->{'type'}}}) {
-#                &$h($t, $i, $tokens);
-#            }
-#        }
         handle($t->{'type'}, [$t, $i, $tokens]);
     }
 }

@@ -275,15 +275,6 @@ sub copyt
 {
     my ($t, $next, $rest) = @_;
 
-#    my $newt = {
-#        'type' => $t->{'type'},
-#        'pattern' => $t->{'pattern'}
-#    };
-
-#    if ($t->{'next'}) {
-#        $newt->{'next'} = $t->{'next'};
-#    }
-
     my $newt = {};
     foreach my $k (keys(%$t)) {
         $newt->{$k} = $t->{$k};

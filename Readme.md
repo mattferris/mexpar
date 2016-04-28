@@ -111,6 +111,41 @@ workflow.
 Grammar
 -------
 
+The rules by which mexpar parses input is dictated by a ruleset known as a
+*grammar*. In the Quickstart section above, we defined a simple grammar
+containing two rules defining the tokens `T_FOO` and `T_BAR`. Let's break down
+the example a bit more to understand what these rules are saying.
+
+Grammar rules are hash references containing keys, or *specifications* (specs),
+for a given token. The two mandatory specs are `type` which defines the internal
+name of the token, and `pattern` which specifies a regular expression which is
+used to match the literal representation of the token. To reiterate,
+`type => 'T_FOO'` specifies the internal name of the token and is used when
+registering token handlers, while `pattern => '^foo$'` specifies the regex that
+`lex()` will use to match the token.
+
+### Capturing Token Values
+
+In many cases, a token won't match a concrete set of characters. Say we had a
+token representing a person's name. The value of the token would need to contain
+the person's name, which of course would not be a static value. This is
+accomplished by specifying `pattern` as follows.
+
+```perl
+pattern => '^([a-zA-Z\'-]+)$'
+```
+
+By enclosing the regex in parenthesis (a sub-pattern in regex parlance), the
+value of the matched string is captured and made stored in the token for use in
+token handlers.
+
+```perl
+ontoken('NAME', sub {
+    my $token = shift;
+    print $token->{'value'};
+});
+```
+
 ### Expressions
 
 Expressions are handled sooner during the parse phase then regular tokens. For

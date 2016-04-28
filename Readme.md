@@ -92,7 +92,7 @@ ontoken('T_BAR', \&handler_bar);
 ```
 
 `ontoken()` accepts a token type as it's first argument and a subroutine
-reference as it's second argument. The handler for `T_FOO` demonstrates a
+reference as it's second argument. The handler for `T_FOO` demonstrates
 registering anonymous subroutine as a handler, while `T_BAR` demonstrates
 registering an existing subroutine as a handler.
 
@@ -140,6 +140,7 @@ value of the matched string is captured and made stored in the token for use in
 token handlers.
 
 ```perl
+# accessing the token's captured value from a handler
 ontoken('NAME', sub {
     my $token = shift;
     print $token->{'value'};
@@ -188,3 +189,39 @@ token's rule.
 
 Handlers
 --------
+
+Handlers are the boundary between mexpar and your application. Everytime a token
+is matched by the parser, any handlers that are registered for that token are
+called. Handlers are registered via `ontoken()` which accepts the handler type
+as it's first argument and a reference to a subroutine as it's second argument.
+The preferred method of registering handlers is to use an anonymous subroutine.
+
+```perl
+# register a handler for the FOO token
+ontoken('FOO', sub {
+   ...    
+});
+```
+
+When a handler is called, it is passed three arguments: the matched token, the
+token's position in the token list, and the token list itself. These three
+arguments allow the handler to perform forward and backward lookups of
+surrounding tokens which can help provide context.
+
+```perl
+ontoken('FOO', sub {
+    my ($token, $position, $list) = @_;
+
+    # get the previous token in the list
+    my $prevToken = $list->[$position-1];
+
+    # get the next token in the list
+    my $nextToken = $list->[$position+1];
+
+    # get the first token in the list
+    my $firstToken = $list->[0];
+});
+```
+
+Multiple handlers can be registered for a single token, and will be called in
+the order that they were registered.

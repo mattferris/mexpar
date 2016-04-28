@@ -4,7 +4,7 @@
 # grammar support.
 # http://bueller.ca/software/mexpar
 #
-# Copyright (c) 2014 Matt Ferris
+# Copyright (c) 2016 Matt Ferris
 # Released under the BSD 2-clause license
 # http://bueller.ca/software/mexpar/license
 #
@@ -65,7 +65,7 @@ sub lex
         }
 
         # if we didn't match any tokens, then we use the
-        # last matched token 
+        # last matched token
         if (defined($curmatch)) {
             if (isgoodt($grammar, $curmatch->{'type'})) {
                 push(@$tokens, $curmatch);
@@ -151,7 +151,7 @@ sub prepare
 
 
 #
-# Advance the window so there are equal characters 
+# Advance the window so there are equal characters
 # on either side of position.
 #
 sub fillbuf
@@ -160,7 +160,7 @@ sub fillbuf
     my $len = 10;
     my $i = 0;
 
-    if ($$pos > 8) { 
+    if ($$pos > 8) {
         $i = 3;
         $$pos -= $i;
         splice(@$buf, 0, $i);

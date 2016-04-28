@@ -111,5 +111,45 @@ workflow.
 Grammar
 -------
 
+### Expressions
+
+Expressions are handled sooner during the parse phase then regular tokens. For
+example, assume you have the following input.
+
+```
+print (3 * 2)
+```
+
+Because the parser works left-to-right through the token list, it's difficult to
+evaluate the expression `(3 * 2)` without performing some kind of look-ahead
+in the handler for `print`. Additionally, while `print` likely only needs to
+output strings and integers, it's `next` spec needs to include all expression
+delimiters that could evaluate to a string or an integer. By specifying `(`
+starts an expression, the parser will call it's handler first, allowing the
+handler to evaluate `3 * 2` and replace the expression with a token representing
+an integer instead. The handler for `print` is called after the expression has
+been evaluated and can simply output the value of the integer. As well, `print`
+can have a simpler `next` spec because the parser will evaluate the spec after
+the expression has been replaced with the resulting value.
+
+```perl
+# non-expression next spec must include all tokens that could represents
+# string or integer values after they are evanluated
+my $printRule = {
+    next => ['STRING', 'INTEGER', 'OPEN_PAREN', 'ROUND', 'RAND', ...],
+    ...
+};
+
+# expression-based spec can include only the tokens that LITERALLY represent a
+# string or integer
+my $printRule = {
+    next => ['STRING', 'INTEGER'],
+    ...
+};
+```
+
+To specify a token represents an expression, set `expression => 1` in the
+token's rule.
+
 Handlers
 --------

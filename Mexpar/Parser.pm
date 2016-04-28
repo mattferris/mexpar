@@ -30,9 +30,13 @@ my $handlers = {};
 #
 sub parse
 {
-    my ($grammar, $tokens, $rest) = @_;
+    my ($grammar, $tokens, $offset) = @_;
 
-    for (my $i = 0; $i<@$tokens; $i++) {
+    if (!defined($offset)) {
+        $offset = 0;
+    }
+
+    for (my $i = $offset; $i<@$tokens; $i++) {
         my $t = $tokens->[$i];
 
         # Scan ahead to make sure we have the right subsequent tokens
@@ -40,12 +44,23 @@ sub parse
 
             # repeating sequences
             if (defined($t->{'min'})) {
+                # evaluate if token represents part of an expression
+                if ($tokens->[$i+1]->{'expression'} == 1) {
+                    parse($grammar, $tokens, $i+1);
+                }
+
                 my $j = 0;
                 my $k = 0;
                 my $seq = $t->{'next'};
                 my $found = 0;
                 my $nextt = $tokens->[$i+$j+1];
                 while ($nextt->{'type'} !~ /$t->{'stop'}/) {
+
+                    # evaluate if token represents part of an expression
+                    if ($nextt->{'expression'} == 1) {
+                        parse($grammar, $tokens, $i+$j+1);
+                    }
+
                     if ($nextt->{'type'} !~ /$seq->[$k]/) {
                         error({
                             code => 'E_UNEXPECTED_TOKEN',
@@ -114,6 +129,12 @@ sub parse
             else {
                 for (my $j=0; $j<@{$t->{'next'}}; $j++) {
                     my $nextt = $tokens->[$i+$j+1];
+
+                    # evaluate if token represents part of an expression
+                    if ($nextt->{'expression'} == 1) {
+                        parse($grammar, $tokens, $i+$j+1);
+                    }
+
                     if ($nextt->{'type'} !~ /$t->{'next'}->[$j]/) {
                         error({
                             code => 'E_UNEXPECTED_TOKEN',

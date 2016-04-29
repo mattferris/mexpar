@@ -147,6 +147,97 @@ ontoken('NAME', sub {
 });
 ```
 
+### Global Options
+
+There are a few global options that can be defined within a grammar. These
+include defining a list of tokens to ignore during `parse()` and special tokens
+that `lex()` will use for identifying the end of a line and the end of a file.
+
+#### Ignore Certain Tokens
+
+In many cases, it is useful to identity tokens with `lex()`, but ignore them
+with `parse()`. Typically, this is whitespace tokens, but could perhaps be
+punctuation in some cases as well. A list of tokens that `parse()` should ignore
+can be defined in a grammar via the top-level `ignore` key. The value of
+`ignore` is a regular expression matching token types.
+
+```perl
+my $grammar = {
+    ignore => '^(SPACE|TAB)'
+};
+```
+
+#### End-of-File & End-of-Line Tokens
+
+mexpar automatically identifies newlines and the end of a file. These tokens are
+silently excluded from resulting token list unless they are defined in the
+`eol` (end-of-line) and `eof` (end-of-file) keys at the top level of the
+grammar. These keys store a single token type each which will be inserted into
+the token as appropriate.
+
+```perl
+my $grammar = {
+    eol => 'NEWLINE',
+    eof => 'EOF'
+};
+```
+
+### Subsequent Tokens
+
+A token can define which tokens must follow. In this way a grammar's syntax can
+be constructed. `parse()` uses this information to determine if the syntax of a
+series of tokens is valid, throwing a parse error if it isn't. This series of subsequent tokens is specified using the `next` spec, and is an array ref of
+token types that satisfy the spec.
+
+```perl
+{
+    type => 'FOO',
+    pattern => '^foo$',
+    next => ['BAR', 'BAZ|BIZ']
+}
+```
+
+In the above example, the `next` spec for `FOO` can be satisfied if `FOO` is
+followed by `BAR`, which is then followed by either `BAZ` *or* `BIZ`.
+
+#### Repeating Sequences
+
+In some cases, the subsequent tokens may reflect a repeating sequence that is
+expected to repeat 0 or more times. Once the `next` spec is defined, two more
+specs are used to specify how many ties the must repeat (`min`) as well as the
+token that delimits the end of the sequence (`stop`). This is useful for
+handling parenthesized, bracketed, or braced lists. For example:
+
+```perl
+{
+    type => 'OPEN_PAREN',
+    pattern => '^\($',
+    next => ['FOO|BAR|BAZ'],
+    mine => 1,
+    stop => 'CLOSE_PAREN'
+}
+```
+
+An optional separator spec can be defined which allows for each sequence to be
+separated by a specific token.
+
+```perl
+{
+    type => 'OPEN_PAREN',
+    pattern => '^\($',
+    next => ['FOO|BAR|BAZ'],
+    mine => 1,
+    stop => 'CLOSE_PAREN'
+    separator => 'COMMA' # define the sequence separator
+}
+```
+
+It is now possible to parse the following list:
+
+```
+(foo,bar,baz)
+```
+
 ### Expressions
 
 Expressions are handled sooner during the parse phase then regular tokens. For
@@ -186,6 +277,8 @@ my $printRule = {
 
 To specify a token represents an expression, set `expression => 1` in the
 token's rule.
+
+### Token Heirarchies
 
 Handlers
 --------
